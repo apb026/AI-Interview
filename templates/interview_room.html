@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Room - AI Interview</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/interview-room.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="interview-room-page">
+    <div class="interview-container">
+        <header class="interview-header">
+            <div class="interview-info">
+                <h1 id="interview-title">Software Developer Interview</h1>
+                <div class="interview-meta">
+                    <span><i class="far fa-clock"></i> <span id="interview-timer">00:00</span></span>
+                    <span><i class="fas fa-level-up-alt"></i> Intermediate Level</span>
+                </div>
+            </div>
+            <div class="interview-controls">
+                <button id="settings-btn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+                <button id="exit-btn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-times"></i> End Interview
+                </button>
+            </div>
+        </header>
+
+        <main class="interview-main">
+            <div class="interviewer-section">
+                <div class="interviewer-container">
+                    <div class="interviewer-avatar">
+                        <img src="/static/images/ai-interviewer.png" alt="AI Interviewer">
+                    </div>
+                    <div class="interviewer-status">
+                        <span class="status-indicator active"></span>
+                        <span>AI Interviewer</span>
+                    </div>
+                </div>
+                <div class="interview-progress">
+                    <div class="progress-indicator">
+                        <div class="progress-step completed">
+                            <span class="step-number">1</span>
+                            <span class="step-label">Introduction</span>
+                        </div>
+                        <div class="progress-line completed"></div>
+                        <div class="progress-step active">
+                            <span class="step-number">2</span>
+                            <span class="step-label">Technical Skills</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step">
+                            <span class="step-number">3</span>
+                            <span class="step-label">Behavioral</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step">
+                            <span class="step-number">4</span>
+                            <span class="step-label">Scenario</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step">
+                            <span class="step-number">5</span>
+                            <span class="step-label">Questions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="conversation-container">
+                <div class="conversation-area" id="conversation-area">
+                    <div class="message interviewer">
+                        <div class="message-avatar">
+                            <img src="/static/images/ai-interviewer-small.png" alt="AI Interviewer">
+                        </div>
+
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">AI Interviewer</span>
+                                <span class="message-time">Just now</span>
+                            </div>
+                            <div class="message-text">
+                                <p>Thank you for joining this interview for the Software Developer position. Let's start with some technical questions.</p>
+                                <p>Could you explain the difference between RESTful APIs and GraphQL, and when you might choose one over the other?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="message user">
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">You</span>
+                                <span class="message-time">Just now</span>
+                            </div>
+                            <div class="message-text">
+                                <p>RESTful APIs and GraphQL are both approaches for building APIs, but they have significant differences:</p>
+                                <p>RESTful APIs use multiple endpoints for different resources and standard HTTP methods. They typically return fixed data structures and may require multiple requests to fetch related data.</p>
+                                <p>GraphQL, on the other hand, uses a single endpoint and allows clients to request exactly the data they need in a single query. This reduces over-fetching and under-fetching of data.</p>
+                                <p>I would choose REST for simple APIs with well-defined resource types and when caching is important. GraphQL works better for complex applications with interconnected data and when bandwidth efficiency matters, such as mobile apps.</p>
+                            </div>
+                        </div>
+                        <div class="message-avatar">
+                            <img src="/static/images/default-avatar.png" alt="You">
+                        </div>
+                    </div>
+                    
+                    <div class="message interviewer">
+                        <div class="message-avatar">
+                            <img src="/static/images/ai-interviewer-small.png" alt="AI Interviewer">
+                        </div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <span class="message-sender">AI Interviewer</span>
+                                <span class="message-time">Just now</span>
+                            </div>
+                            <div class="message-text">
+                                <p>Great explanation. I appreciate how you highlighted the trade-offs between the two approaches.</p>
+                                <p>Now, let's move on to another technical question. Can you explain how you would optimize a website's performance? Please include both front-end and back-end considerations.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+
+                <div class="response-area">
+                    <div class="response-tools">
+                        <button class="tool-btn" title="Use voice input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="tool-btn" title="Take a pause">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button class="tool-btn" title="Request clarification">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                    </div>
+                    <div class="response-input">
+                        <textarea id="user-response" placeholder="Type your response here..."></textarea>
+                    </div>
+                    <div class="response-actions">
+                        <div class="timer-indicator">
+                            <i class="fas fa-stopwatch"></i> <span id="response-timer">01:20</span>
+                        </div>
+                        <button class="btn btn-primary send-btn" id="send-response">
+                            <i class="fas fa-paper-plane"></i> Send Response
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-panel">
+                <div class="feedback-header">
+                    <h3>Real-time Feedback</h3>
+                    <button class="toggle-feedback-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="feedback-content">
+                    <div class="feedback-item">
+                        <div class="feedback-category">
+                            <i class="fas fa-bullseye"></i> Content Relevance
+                        </div>
+                        <div class="feedback-rating">
+                            <div class="rating-bar">
+                                <div class="rating-fill" style="width:85%"></div>
+                            </div>
+                            <span class="rating-value">85%</span>
+                        </div>
+                        <div class="feedback-note">
+                            Your answer directly addressed the question with good examples.
+                        </div>
+                    </div>
+                    
+                    <div class="feedback-item">
+                        <div class="feedback-category">
+                            <i class="fas fa-comment"></i> Communication Clarity
+                        </div>
+                        <div class="feedback-rating">
+                            <div class="rating-bar">
+                                <div class="rating-fill" style="width:90%"></div>
+                            </div>
+                            <span class="rating-value">90%</span>
+                        </div>
+                        <div class="feedback-note">
+                            Well-structured response with clear explanations.
+                        </div>
+                    </div>
+                    
+                    <div class="feedback-item">
+                        <div class="feedback-category">
+                            <i class="fas fa-brain"></i> Technical Accuracy
+                        </div>
+                        <div class="feedback-rating">
+                            <div class="rating-bar">
+                                <div class="rating-fill" style="width:80%"></div>
+                            </div>
+                            <span class="rating-value">80%</span>
+                        </div>
+                        <div class="feedback-note">
+                            Accurate core concepts, could add more specific technical details.
+                        </div>
+                    </div>
+                    
+                    <div class="feedback-item">
+                        <div class="feedback-category">
+                            <i class="fas fa-stopwatch"></i> Response Time
+                        </div>
+                        <div class="feedback-rating">
+                            <div class="rating-bar">
+                                <div class="rating-fill" style="width:75%"></div>
+                            </div>
+                            <span class="rating-value">75%</span>
+                        </div>
+                        <div class="feedback-note">
+                            Good timing, but try to be slightly more concise.
+                        </div>
+                    </div>
+
+                    <div class="tip-box">
+                        <div class="tip-header">
+                            <i class="fas fa-lightbulb"></i> Interview Tip
+                        </div>
+                        <div class="tip-content">
+                            When discussing technical concepts, include real-world examples from your experience to make your answers more impactful.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="interview-modals">
+            <div class="modal" id="settings-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Interview Settings</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="setting-group">
+                            <h3>Difficulty Level</h3>
+                            <div class="difficulty-selector">
+                                <button class="difficulty-btn" data-level="beginner">Beginner</button>
+                                <button class="difficulty-btn active" data-level="intermediate">Intermediate</button>
+                                <button class="difficulty-btn" data-level="advanced">Advanced</button>
+                            </div>
+                        </div>
+                        <div class="setting-group">
+                            <h3>Interview Focus</h3>
+                            <div class="focus-checkboxes">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="focus-technical" checked>
+                                    <label for="focus-technical">Technical Skills</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="focus-behavioral" checked>
+                                    <label for="focus-behavioral">Behavioral Questions</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="focus-scenarios">
+                                    <label for="focus-scenarios">Problem Scenarios</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="setting-group">
+                            <h3>Feedback Display</h3>
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" id="feedback-realtime" name="feedback-timing" checked>
+                                    <label for="feedback-realtime">Real-time Feedback</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" id="feedback-end" name="feedback-timing">
+                                    <label for="feedback-end">After Interview Only</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" id="cancel-settings">Cancel</button>
+                        <button class="btn btn-primary" id="save-settings">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal" id="exit-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>End Interview?</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to end this interview? Your progress will be saved, but the interview will be marked as incomplete.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" id="cancel-exit">Continue Interview</button>
+                        <button class="btn btn-primary" id="confirm-exit">End Interview</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/interview-room.js"></script>
+</body>
+</html>

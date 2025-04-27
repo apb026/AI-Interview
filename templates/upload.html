@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Resume - AI Interview</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/upload.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>AI Interview</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="/new-interview"><i class="fas fa-plus-circle"></i> New Interview</a>
+                    </li>
+                    <li class="active">
+                        <a href="/upload"><i class="fas fa-upload"></i> Upload Resume</a>
+                    </li>
+                    <li>
+                        <a href="/history"><i class="fas fa-history"></i> Interview History</a>
+                    </li>
+                    <li>
+                        <a href="/feedback"><i class="fas fa-comment-alt"></i> Feedback</a>
+                    </li>
+                    <li>
+                        <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="page-title">
+                    <h1>Upload Your Resume</h1>
+                    <p>Help us personalize your interview experience</p>
+                </div>
+                <div class="user-profile">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">2</span>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/static/images/default-avatar.png" alt="User avatar">
+                    </div>
+                </div>
+            </header>
+
+            <section class="upload-container">
+                <div class="upload-card">
+                    <div class="upload-instructions">
+                        <h2>Why Upload Your Resume?</h2>
+                        <p>Uploading your resume helps our AI system:</p>
+                        <ul>
+                            <li>Personalize interview questions based on your experience</li>
+                            <li>Identify skills gaps and suggest improvements</li>
+                            <li>Tailor feedback to your career goals</li>
+                            <li>Generate more realistic interview scenarios</li>
+                        </ul>
+                        <div class="format-info">
+                            <h3>Supported Formats</h3>
+                            <div class="format-icons">
+                                <span class="format-icon"><i class="far fa-file-pdf"></i> PDF</span>
+                                <span class="format-icon"><i class="far fa-file-word"></i> DOCX</span>
+                                <span class="format-icon"><i class="far fa-file-alt"></i> TXT</span>
+                            </div>
+                            <p>Maximum file size: 5MB</p>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-area">
+                        <form id="resume-upload-form" action="/api/upload-resume" method="post" enctype="multipart/form-data">
+                            <div class="drop-zone">
+                                <div class="drop-zone-prompt">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag and drop your resume here</p>
+                                    <span>- or -</span>
+                                    <button type="button" class="btn btn-outline browse-btn">Browse Files</button>
+                                    <input type="file" id="resume-file" name="resume" accept=".pdf,.docx,.txt" hidden>
+                                </div>
+                                <div class="file-preview" style="display: none;">
+                                    <div class="file-preview-info">
+                                        <i class="far fa-file-alt file-icon"></i>
+                                        <div class="file-details">
+                                            <span class="file-name">resume.pdf</span>
+                                            <span class="file-size">350 KB</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="remove-file-btn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="privacy-note">
+                                <p><i class="fas fa-lock"></i> Your resume data is encrypted and will only be used to improve your interview experience.</p>
+                            </div>
+                            
+                            <div class="job-interests">
+                                <h3>Target Job Roles</h3>
+                                <p>Select job roles you're interested in to further customize your experience:</p>
+                                <div class="job-tags">
+                                    <div class="job-tag">
+                                        <input type="checkbox" id="software-developer" name="job_roles[]" value="software_developer">
+                                        <label for="software-developer">Software Developer</label>
+                                    </div>
+                                    <div class="job-tag">
+                                        <input type="checkbox" id="data-scientist" name="job_roles[]" value="data_scientist">
+                                        <label for="data-scientist">Data Scientist</label>
+                                    </div>
+                                    <div class="job-tag">
+                                        <input type="checkbox" id="product-manager" name="job_roles[]" value="product_manager">
+                                        <label for="product-manager">Product Manager</label>
+                                    </div>
+                                    <div class="job-tag">
+                                        <input type="checkbox" id="ux-designer" name="job_roles[]" value="ux_designer">
+                                        <label for="ux-designer">UX Designer</label>
+                                    </div>
+                                    <div class="job-tag">
+                                        <input type="checkbox" id="marketing" name="job_roles[]" value="marketing">
+                                        <label for="marketing">Marketing</label>
+                                    </div>
+                                    <div class="job-tag">
+                                        <input type="checkbox" id="sales" name="job_roles[]" value="sales">
+                                        <label for="sales">Sales</label>
+                                    </div>
+                                    <div class="job-tag">
+                                        <input type="checkbox" id="finance" name="job_roles[]" value="finance">
+                                        <label for="finance">Finance</label>
+                                    </div>
+                                    <div class="job-tag">
+                                        <input type="checkbox" id="customer-service" name="job_roles[]" value="customer_service">
+                                        <label for="customer-service">Customer Service</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary btn-large upload-btn" disabled>Upload Resume</button>
+                                <a href="/dashboard" class="btn btn-outline btn-large">Skip for Now</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/upload.js"></script>
+</body>
+</html>

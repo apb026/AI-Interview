@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Interview</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>AI Interview</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="/new-interview"><i class="fas fa-plus-circle"></i> New Interview</a>
+                    </li>
+                    <li>
+                        <a href="/history"><i class="fas fa-history"></i> Interview History</a>
+                    </li>
+                    <li>
+                        <a href="/feedback"><i class="fas fa-comment-alt"></i> Feedback</a>
+                    </li>
+                    <li>
+                        <a href="/progress"><i class="fas fa-chart-line"></i> Progress</a>
+                    </li>
+                    <li>
+                        <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="user-welcome">
+                    <h1>Welcome back, <span id="user-name">User</span>!</h1>
+                    <p>Let's continue improving your interview skills</p>
+                </div>
+                <div class="user-profile">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-avatar">
+                        <img src="/static/images/default-avatar.png" alt="User avatar">
+                    </div>
+                </div>
+            </header>
+
+            <section class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>5</h3>
+                        <p>Interviews Completed</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>3.5 hrs</h3>
+                        <p>Practice Time</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>78%</h3>
+                        <p>Average Score</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>12</h3>
+                        <p>Skills Improved</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="recent-interviews">
+                <div class="section-header">
+                    <h2>Recent Interviews</h2>
+                    <a href="/history" class="view-all">View All</a>
+                </div>
+                <div class="interviews-list">
+                    <div class="interview-card">
+                        <div class="interview-info">
+                            <h3>Software Developer Interview</h3>
+                            <p>Technical interview for mid-level position</p>
+                            <div class="interview-meta">
+                                <span><i class="far fa-calendar"></i> Apr 24, 2023</span>
+                                <span><i class="far fa-clock"></i> 45 min</span>
+                            </div>
+                        </div>
+                        <div class="interview-score">
+                            <div class="score-circle">
+                                <span>82%</span>
+                            </div>
+                        </div>
+                        <div class="interview-actions">
+                            <a href="/interview/123/review" class="btn btn-outline btn-sm">Review</a>
+                        </div>
+                    </div>
+                    
+                    <div class="interview-card">
+                        <div class="interview-info">
+                            <h3>Product Manager Interview</h3>
+                            <p>Behavioral questions focused on leadership</p>
+                            <div class="interview-meta">
+                                <span><i class="far fa-calendar"></i> Apr 22, 2023</span>
+                                <span><i class="far fa-clock"></i> 35 min</span>
+                            </div>
+                        </div>
+                        <div class="interview-score">
+                            <div class="score-circle">
+                                <span>75%</span>
+                            </div>
+                        </div>
+                        <div class="interview-actions">
+                            <a href="/interview/122/review" class="btn btn-outline btn-sm">Review</a>
+                        </div>
+                    </div>
+                    
+                    <div class="interview-card">
+                        <div class="interview-info">
+                            <h3>Data Scientist Interview</h3>
+                            <p>Technical and case study questions</p>
+                            <div class="interview-meta">
+                                <span><i class="far fa-calendar"></i> Apr 20, 2023</span>
+                                <span><i class="far fa-clock"></i> 50 min</span>
+                            </div>
+                        </div>
+                        <div class="interview-score">
+                            <div class="score-circle">
+                                <span>88%</span>
+                            </div>
+                        </div>
+                        <div class="interview-actions">
+                            <a href="/interview/121/review" class="btn btn-outline btn-sm">Review</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="skills-improvement">
+                <div class="section-header">
+                    <h2>Skills Improvement</h2>
+                </div>
+                <div class="skills-chart">
+                    <div class="skill-item">
+                        <div class="skill-info">
+                            <span class="skill-name">Technical Knowledge</span>
+                            <span class="skill-percentage">85%</span>
+                        </div>
+                        <div class="skill-progress">
+                            <div class="progress-bar" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-info">
+                            <span class="skill-name">Communication</span>
+                            <span class="skill-percentage">78%</span>
+                        </div>
+                        <div class="skill-progress">
+                            <div class="progress-bar" style="width: 78%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-info">
+                            <span class="skill-name">Problem Solving</span>
+                            <span class="skill-percentage">92%</span>
+                        </div>
+                        <div class="skill-progress">
+                            <div class="progress-bar" style="width: 92%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-info">
+                            <span class="skill-name">Leadership</span>
+                            <span class="skill-percentage">65%</span>
+                        </div>
+                        <div class="skill-progress">
+                            <div class="progress-bar" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="skill-info">
+                            <span class="skill-name">Cultural Fit</span>
+                            <span class="skill-percentage">81%</span>
+                        </div>
+                        <div class="skill-progress">
+                            <div class="progress-bar" style="width: 81%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="recommended-practice">
+                <div class="section-header">
+                    <h2>Recommended Practice</h2>
+                </div>
+                <div class="practice-cards">
+                    <div class="practice-card">
+                        <div class="practice-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <div class="practice-info">
+                            <h3>Behavioral Questions</h3>
+                            <p>Practice answering questions about your past experiences and work style.</p>
+                            <a href="/practice/behavioral" class="btn btn-primary btn-sm">Start Practice</a>
+                        </div>
+                    </div>
+                    <div class="practice-card">
+                        <div class="practice-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <div class="practice-info">
+                            <h3>Technical Interview</h3>
+                            <p>Work on technical questions related to your field and skill level.</p>
+                            <a href="/practice/technical" class="btn btn-primary btn-sm">Start Practice</a>
+                        </div>
+                    </div>
+                    <div class="practice-card">
+                        <div class="practice-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="practice-info">
+                            <h3>Case Study Analysis</h3>
+                            <p>Practice analyzing business problems and presenting solutions.</p>
+                            <a href="/practice/case-study" class="btn btn-primary btn-sm">Start Practice</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

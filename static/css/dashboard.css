@@ -1,0 +1,499 @@
+/* 
+ * AI Interview Platform
+ * Dashboard Page CSS
+ */
+
+/* ----------------- DASHBOARD LAYOUT ----------------- */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  /* ----------------- SIDEBAR ----------------- */
+  .sidebar {
+    width: 260px;
+    background-color: var(--background-dark);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    transition: all var(--transition-normal);
+  }
+  
+  .sidebar-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .sidebar-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .sidebar-nav {
+    flex: 1;
+    padding: var(--spacing-md) 0;
+    overflow-y: auto;
+  }
+  
+  .sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .sidebar-nav li {
+    margin-bottom: 2px;
+  }
+  
+  .sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    color: rgba(255, 255, 255, 0.7);
+    transition: all var(--transition-fast);
+    border-left: 3px solid transparent;
+  }
+  
+  .sidebar-nav a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+  }
+  
+  .sidebar-nav li.active a {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-left-color: var(--primary-color);
+  }
+  
+  .sidebar-nav a i {
+    margin-right: var(--spacing-md);
+    width: 20px;
+    text-align: center;
+  }
+  
+  .sidebar-footer {
+    padding: var(--spacing-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .logout-btn:hover {
+    color: white;
+  }
+  
+  .logout-btn i {
+    margin-right: var(--spacing-sm);
+  }
+  
+  /* ----------------- MAIN CONTENT ----------------- */
+  .main-content {
+    flex: 1;
+    margin-left: 260px;
+    padding: var(--spacing-lg);
+    background-color: var(--background-light);
+  }
+  
+  /* ----------------- DASHBOARD HEADER ----------------- */
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+  }
+  
+  .user-welcome h1 {
+    margin-bottom: var(--spacing-xs);
+    font-size: 1.75rem;
+  }
+  
+  .user-welcome p {
+    color: var(--text-light);
+    margin: 0;
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+  }
+  
+  .notifications {
+    position: relative;
+    margin-right: var(--spacing-lg);
+    padding: var(--spacing-xs);
+  cursor: pointer;
+}
+
+.notifications i {
+  font-size: 1.25rem;
+  color: var(--text-light);
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: var(--error-color);
+  color: white;
+  font-size: 0.75rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ----------------- DASHBOARD STATS ----------------- */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+  background-color: var(--background-white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-md);
+  background-color: rgba(79, 70, 229, 0.1);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-md);
+}
+
+.stat-icon i {
+  font-size: 1.5rem;
+}
+
+.stat-info h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0;
+}
+
+.stat-info p {
+  color: var(--text-light);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* ----------------- DASHBOARD SECTIONS ----------------- */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.view-all {
+  color: var(--primary-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* ----------------- RECENT INTERVIEWS ----------------- */
+.recent-interviews {
+  background-color: var(--background-white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-xl);
+}
+
+.interviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.interview-card {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.interview-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.interview-info {
+  flex: 1;
+}
+
+.interview-info h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.interview-info p {
+  color: var(--text-light);
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
+}
+
+.interview-meta {
+  display: flex;
+  gap: var(--spacing-md);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.interview-meta span {
+  display: flex;
+  align-items: center;
+}
+
+.interview-meta i {
+  margin-right: var(--spacing-xs);
+}
+
+.interview-score {
+  margin: 0 var(--spacing-lg);
+}
+
+.score-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* ----------------- SKILLS IMPROVEMENT ----------------- */
+.skills-improvement {
+  background-color: var(--background-white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-xl);
+}
+
+.skills-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.skill-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.skill-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.skill-name {
+  font-weight: 500;
+}
+
+.skill-percentage {
+  color: var(--text-light);
+}
+
+.skill-progress {
+  width: 100%;
+  height: 8px;
+  background-color: var(--border-color);
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: var(--primary-color);
+  border-radius: var(--border-radius-full);
+}
+
+/* ----------------- RECOMMENDED PRACTICE ----------------- */
+.recommended-practice {
+  background-color: var(--background-white);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-xl);
+}
+
+.practice-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.practice-card {
+  display: flex;
+  align-items: flex-start;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.practice-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.practice-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-md);
+  background-color: rgba(79, 70, 229, 0.1);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-md);
+}
+
+.practice-icon i {
+  font-size: 1.25rem;
+}
+
+.practice-info {
+  flex: 1;
+}
+
+.practice-info h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.practice-info p {
+  color: var(--text-light);
+  margin-bottom: var(--spacing-md);
+  font-size: 0.875rem;  
+}
+
+/* ----------------- RESPONSIVE ----------------- */
+@media (max-width: 992px) {
+  .sidebar {
+    width: 80px;
+  }
+  
+  .sidebar-header h2,
+  .sidebar-nav a span {
+    display: none;
+  }
+  
+  .sidebar-nav a {
+    justify-content: center;
+    padding: var(--spacing-md);
+  }
+  
+  .sidebar-nav a i {
+    margin-right: 0;
+  }
+  
+  .main-content {
+    margin-left: 80px;
+  }
+  
+  .logout-btn span {
+    display: none;
+  }
+  
+  .logout-btn {
+    justify-content: center;
+  }
+  
+  .logout-btn i {
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .practice-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .interview-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .interview-score {
+    margin: var(--spacing-md) 0;
+  }
+  
+  .interview-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 576px) {
+  .sidebar {
+    width: 0;
+    transform: translateX(-100%);
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .user-profile {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

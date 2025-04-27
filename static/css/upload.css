@@ -1,0 +1,287 @@
+/* 
+ * AI Interview Platform
+ * Upload Page CSS
+ */
+
+/* ----------------- UPLOAD CONTAINER ----------------- */
+.upload-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .upload-card {
+    background-color: var(--background-white);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xl);
+  }
+  
+  /* ----------------- UPLOAD INSTRUCTIONS ----------------- */
+  .upload-instructions h2 {
+    margin-bottom: var(--spacing-md);
+    font-size: 1.5rem;
+  }
+  
+  .upload-instructions p {
+    color: var(--text-light);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .upload-instructions ul {
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .upload-instructions li {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-light);
+  }
+  
+  .format-info {
+    background-color: rgba(79, 70, 229, 0.05);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+  }
+  
+  .format-info h3 {
+    font-size: 1rem;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .format-icons {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .format-icon {
+    display: flex;
+    align-items: center;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+  
+  .format-icon i {
+    margin-right: var(--spacing-xs);
+    color: var(--primary-color);
+  }
+  
+  .format-info p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+  
+  /* ----------------- DROP ZONE ----------------- */
+  .upload-area {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-lg);
+    background-color: var(--background-light);
+    text-align: center;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    margin-bottom: var(--spacing-md);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .drop-zone:hover, .drop-zone.active {
+    border-color: var(--primary-color);
+    background-color: rgba(79, 70, 229, 0.05);
+  }
+  
+  .drop-zone-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .drop-zone-prompt i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .drop-zone-prompt p {
+    font-size: 1.125rem;
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .drop-zone-prompt span {
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .browse-btn {
+    margin-top: var(--spacing-xs);
+  }
+  
+  .file-preview {
+    width: 100%;
+    padding: var(--spacing-md);
+    background-color: var(--background-light);
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .file-preview-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .file-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-right: var(--spacing-md);
+  }
+  
+  .file-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .file-name {
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .file-size {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+  }
+  
+  .remove-file-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+  }
+  
+  .remove-file-btn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+  }
+  
+  /* ----------------- PRIVACY NOTE ----------------- */
+  .privacy-note {
+    background-color: rgba(16, 185, 129, 0.05);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .privacy-note p {
+    display: flex;
+    align-items: center;
+    color: var(--success-color);
+    font-size: 0.875rem;
+    margin: 0;
+  }
+  
+  .privacy-note i {
+    margin-right: var(--spacing-xs);
+  }
+  
+  /* ----------------- JOB INTERESTS ----------------- */
+  .job-interests {
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .job-interests h3 {
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .job-interests p {
+    color: var(--text-light);
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .job-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+  
+  .job-tag {
+    position: relative;
+  }
+  
+  .job-tag input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+  }
+  
+  .job-tag label {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--border-radius-full);
+    background-color: var(--background-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  
+  .job-tag input[type="checkbox"]:checked + label {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+  
+  .job-tag label:hover {
+    border-color: var(--primary-color);
+  }
+  
+  /* ----------------- FORM ACTIONS ----------------- */
+  .form-actions {
+    display: flex;
+    gap: var(--spacing-md);
+  }
+  
+  .upload-btn {
+    flex: 1;
+  }
+  
+  /* ----------------- RESPONSIVE ----------------- */
+  @media (max-width: 992px) {
+    .upload-card {
+      grid-template-columns: 1fr;
+    }
+    
+    .format-icons {
+      flex-wrap: wrap;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .form-actions {
+      flex-direction: column;
+    }
+  }
