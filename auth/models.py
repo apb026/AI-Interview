@@ -1,162 +1,257 @@
-from dataclasses import dataclass
-from typing import List, Dict, Optional, Any
-from datetime import datetime
+from flask_login import UserMixin
+from firebase_admin import firestore
+from werkzeug.security import generate_password_hash, check_password_hash
+import time
+import uuid
 
-
-@dataclass
-class User:
-    """User model representing a user in the system"""
-    user_id: str
-    email: str
-    display_name: Optional[str] = None
-    email_verified: bool = False
-    photo_url: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    last_login: Optional[datetime] = None
+class User(UserMixin):
+    """User model for authentication and profile management"""
+    
+    def __init__(self, user_id, email, first_name=None, last_name=None, role='user', 
+                 created_at=None, last_login=None, profile_data=None):
+        self.id = user_id
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.role = role
+        self.created_at = created_at or int(time.time())
+        self.last_login = last_login
+        self.profile_data = profile_data or {}
+        
+    @property
+    def full_name(self):
+        """Get the user's full name"""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        elif self.first_name:
+            return self.first_name
+        return "User"
     
     @staticmethod
-    def from_dict(user_id: str, data: Dict[str, Any]) -> 'User':
+    def create_user(email, password, first_name=None, last_name=None, role='user'):
         """
-        Create a User object from a dictionary
+        Create a new user in the database
         
         Args:
-            user_id: User ID
-            data: Dictionary containing user data
+            email (str): User's email address
+            password (str): User's password
+            first_name (str, optional): User's first name
+            last_name (str, optional): User's last name
+            role (str, optional): User's role (default: 'user')
             
         Returns:
-            User object
+            User: The created user object
         """
+        # Check if user already exists
+        db = firestore.client()
+        existing_user = db.collection('users').where('email', '==', email).limit(1).get()
+        if len(existing_user) > 0:
+            raise ValueError(f"User with email {email} already exists")
+        
+        # Generate user ID
+        user_id = str(uuid.uuid4())
+        
+        # Create user data
+        now = int(time.time())
+        user_data = {
+            'id': user_id,
+            'email': email,
+            'password_hash': generate_password_hash(password),
+            'first_name': first_name,
+            'last_name': last_name,
+            'role': role,
+            'created_at': now,
+            'last_login': now,
+            'profile_data': {}
+        }
+        
+        # Save to database
+        db.collection('users').document(user_id).set(user_data)
+        
+        # Return user object
         return User(
             user_id=user_id,
-            email=data.get('email'),
-            display_name=data.get('display_name'),
-            email_verified=data.get('email_verified', False),
-            photo_url=data.get('photo_url'),
-            created_at=data.get('created_at'),
-            updated_at=data.get('updated_at'),
-            last_login=data.get('last_login')
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            role=role,
+            created_at=now,
+            last_login=now
         )
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert User object to a dictionary
-        
-        Returns:
-            Dictionary representation of the User
-        """
-        return {
-            'email': self.email,
-            'display_name': self.display_name,
-            'email_verified': self.email_verified,
-            'photo_url': self.photo_url,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at,
-            'last_login': self.last_login
-        }
-
-
-@dataclass
-class UserPreferences:
-    """User preferences model for storing user-specific settings"""
-    user_id: str
-    notification_settings: Dict[str, bool] = None
-    theme: str = 'light'
-    language: str = 'en'
-    timezone: str = 'UTC'
-    dashboard_layout: Dict[str, Any] = None
     
     @staticmethod
-    def from_dict(user_id: str, data: Dict[str, Any]) -> 'UserPreferences':
+    def get_by_id(user_id):
         """
-        Create a UserPreferences object from a dictionary
+        Get a user by ID
         
         Args:
-            user_id: User ID
-            data: Dictionary containing user preferences data
+            user_id (str): User ID
             
         Returns:
-            UserPreferences object
+            User: User object or None if not found
         """
-        return UserPreferences(
-            user_id=user_id,
-            notification_settings=data.get('notification_settings', {
-                'email': True,
-                'web': True
-            }),
-            theme=data.get('theme', 'light'),
-            language=data.get('language', 'en'),
-            timezone=data.get('timezone', 'UTC'),
-            dashboard_layout=data.get('dashboard_layout', {})
-        )
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert UserPreferences object to a dictionary
+        db = firestore.client()
+        user_doc = db.collection('users').document(user_id).get()
         
-        Returns:
-            Dictionary representation of the UserPreferences
-        """
-        return {
-            'notification_settings': self.notification_settings or {
-                'email': True,
-                'web': True
-            },
-            'theme': self.theme,
-            'language': self.language,
-            'timezone': self.timezone,
-            'dashboard_layout': self.dashboard_layout or {}
-        }
-
-
-@dataclass
-class UserSession:
-    """User session model for tracking authentication sessions"""
-    session_id: str
-    user_id: str
-    token: str
-    created_at: datetime
-    expires_at: datetime
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
-    is_active: bool = True
+        if not user_doc.exists:
+            return None
+        
+        user_data = user_doc.to_dict()
+        return User(
+            user_id=user_data['id'],
+            email=user_data['email'],
+            first_name=user_data.get('first_name'),
+            last_name=user_data.get('last_name'),
+            role=user_data.get('role', 'user'),
+            created_at=user_data.get('created_at'),
+            last_login=user_data.get('last_login'),
+            profile_data=user_data.get('profile_data', {})
+        )
     
     @staticmethod
-    def from_dict(session_id: str, data: Dict[str, Any]) -> 'UserSession':
+    def get_by_email(email):
         """
-        Create a UserSession object from a dictionary
+        Get a user by email
         
         Args:
-            session_id: Session ID
-            data: Dictionary containing session data
+            email (str): User email
             
         Returns:
-            UserSession object
+            User: User object or None if not found
         """
-        return UserSession(
-            session_id=session_id,
-            user_id=data.get('user_id'),
-            token=data.get('token'),
-            created_at=data.get('created_at'),
-            expires_at=data.get('expires_at'),
-            ip_address=data.get('ip_address'),
-            user_agent=data.get('user_agent'),
-            is_active=data.get('is_active', True)
-        )
+        db = firestore.client()
+        users = db.collection('users').where('email', '==', email).limit(1).get()
+        
+        if not users:
+            return None
+        
+        for user_doc in users:
+            user_data = user_doc.to_dict()
+            return User(
+                user_id=user_data['id'],
+                email=user_data['email'],
+                first_name=user_data.get('first_name'),
+                last_name=user_data.get('last_name'),
+                role=user_data.get('role', 'user'),
+                created_at=user_data.get('created_at'),
+                last_login=user_data.get('last_login'),
+                profile_data=user_data.get('profile_data', {})
+            )
+        
+        return None
     
-    def to_dict(self) -> Dict[str, Any]:
+    @staticmethod
+    def authenticate(email, password):
         """
-        Convert UserSession object to a dictionary
+        Authenticate a user with email and password
+        
+        Args:
+            email (str): User email
+            password (str): User password
+            
+        Returns:
+            User: Authenticated user or None if authentication failed
+        """
+        db = firestore.client()
+        users = db.collection('users').where('email', '==', email).limit(1).get()
+        
+        if not users:
+            return None
+        
+        for user_doc in users:
+            user_data = user_doc.to_dict()
+            if check_password_hash(user_data.get('password_hash', ''), password):
+                # Update last login
+                now = int(time.time())
+                db.collection('users').document(user_data['id']).update({'last_login': now})
+                
+                return User(
+                    user_id=user_data['id'],
+                    email=user_data['email'],
+                    first_name=user_data.get('first_name'),
+                    last_name=user_data.get('last_name'),
+                    role=user_data.get('role', 'user'),
+                    created_at=user_data.get('created_at'),
+                    last_login=now,
+                    profile_data=user_data.get('profile_data', {})
+                )
+        
+        return None
+    
+    def update_profile(self, data):
+        """
+        Update user profile data
+        
+        Args:
+            data (dict): Profile data to update
+            
+        Returns:
+            bool: True if successful
+        """
+        db = firestore.client()
+        
+        # Update only allowed fields
+        allowed_fields = ['first_name', 'last_name', 'profile_data']
+        update_data = {k: v for k, v in data.items() if k in allowed_fields}
+        
+        if 'profile_data' in data and isinstance(data['profile_data'], dict):
+            # Merge profile data instead of replacing
+            current_profile = self.profile_data or {}
+            updated_profile = {**current_profile, **data['profile_data']}
+            update_data['profile_data'] = updated_profile
+        
+        # Update object attributes
+        for key, value in update_data.items():
+            setattr(self, key, value)
+        
+        # Update in database
+        db.collection('users').document(self.id).update(update_data)
+        return True
+    
+    def change_password(self, current_password, new_password):
+        """
+        Change user password
+        
+        Args:
+            current_password (str): Current password
+            new_password (str): New password
+            
+        Returns:
+            bool: True if successful, False if current password is incorrect
+        """
+        db = firestore.client()
+        user_doc = db.collection('users').document(self.id).get()
+        
+        if not user_doc.exists:
+            return False
+        
+        user_data = user_doc.to_dict()
+        
+        # Verify current password
+        if not check_password_hash(user_data.get('password_hash', ''), current_password):
+            return False
+        
+        # Update password
+        db.collection('users').document(self.id).update({
+            'password_hash': generate_password_hash(new_password)
+        })
+        
+        return True
+    
+    def get_interview_history(self):
+        """
+        Get user's interview history
         
         Returns:
-            Dictionary representation of the UserSession
+            list: List of interview sessions
         """
-        return {
-            'user_id': self.user_id,
-            'token': self.token,
-            'created_at': self.created_at,
-            'expires_at': self.expires_at,
-            'ip_address': self.ip_address,
-            'user_agent': self.user_agent,
-            'is_active': self.is_active
-        }
+        db = firestore.client()
+        sessions = db.collection('interview_sessions').where('user_id', '==', self.id).order_by(
+            'start_time', direction='DESCENDING').limit(50).get()
+        
+        result = []
+        for session in sessions:
+            session_data = session.to_dict()
+            result.append(session_data)
+        
+        return result

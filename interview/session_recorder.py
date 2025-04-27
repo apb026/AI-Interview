@@ -1,351 +1,337 @@
 import os
 import json
 import time
-from datetime import datetime
-from typing import Dict, List, Any, Optional
-import logging
-import uuid
+import datetime
+from firebase_admin import firestore
+from app.auth.models import User
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-class InterviewSession:
-    """Represents an interview session with metadata and QA pairs."""
+class InterviewSessionRecorder:
+    """
+    Records and manages interview sessions including questions, answers, and feedback.
+    """
     
-    def __init__(self, 
-               session_id: Optional[str] = None,
-               candidate_id: Optional[str] = None,
-               job_id: Optional[str] = None,
-               interviewer_persona_id: Optional[str] = None,
-               metadata: Optional[Dict[str, Any]] = None):
-        """Initialize an interview session.
+    def __init__(self, user_id, job_id=None):
+        """
+        Initialize the session recorder.
         
         Args:
-            session_id: Unique identifier for the session
-            candidate_id: ID of the candidate
-            job_id: ID of the job position
-            interviewer_persona_id: ID of the interviewer persona
-            metadata: Additional session metadata
+            user_id (str): The ID of the user taking the interview
+            job_id (str, optional): The ID of the job position
         """
-        self.session_id = session_id or str(uuid.uuid4())
-        self.candidate_id = candidate_id
+        self.user_id = user_id
         self.job_id = job_id
-        self.interviewer_persona_id = interviewer_persona_id
-        self.metadata = metadata or {}
-        
-        # Initialize session data
-        self.start_time = time.time()
+        self.session_id = f"{user_id}_{int(time.time())}"
+        self.start_time = datetime.datetime.now()
         self.end_time = None
-        self.duration = None
         self.questions = []
         self.answers = []
-        self.evaluations = []
-        self.notes = []
-        self.overall_score = None
-        self.status = "in_progress"  # in_progress, completed, canceled
-    
-    def add_question(self, question: Dict[str, Any]) -> None:
-        """Add a question to the session.
-        
-        Args:
-            question: Question data with text and metadata
-        """
-        question_entry = {
-            "question_id": len(self.questions) + 1,
-            "text": question["question"],
-            "category": question.get("category", "general"),
-            "timestamp": time.time(),
-            "metadata": question.get("metadata", {})
+        self.feedback = []
+        self.metrics = {
+            "total_questions": 0,
+            "avg_response_time": 0,
+            "completion_rate": 0,
+            "technical_score": 0,
+            "communication_score": 0,
+            "overall_score": 0
         }
-        self.questions.append(question_entry)
-    
-    def add_answer(self, question_id: int, answer_text: str, metadata: Optional[Dict[str, Any]] = None) -> None:
-        """Add an answer to a question.
+        self.db = firestore.client()
+        
+    def start_session(self, job_title=None, resume_path=None, jd_path=None):
+        """
+        Start a new interview session
         
         Args:
-            question_id: ID of the question being answered
-            answer_text: Text of the candidate's answer
-            metadata: Additional metadata about the answer
-        """
-        answer_entry = {
-            "question_id": question_id,
-            "text": answer_text,
-            "timestamp": time.time(),
-            "metadata": metadata or {}
-        }
-        self.answers.append(answer_entry)
-    
-    def add_evaluation(self, question_id: int, evaluation: Dict[str, Any]) -> None:
-        """Add an evaluation for an answer.
-        
-        Args:
-            question_id: ID of the question being evaluated
-            evaluation: Evaluation data including scores and feedback
-        """
-        eval_entry = {
-            "question_id": question_id,
-            "score": evaluation.get("score", 0),
-            "feedback": evaluation.get("feedback", ""),
-            "strengths": evaluation.get("strengths", []),
-            "improvements": evaluation.get("improvements", []),
-            "timestamp": time.time()
-        }
-        self.evaluations.append(eval_entry)
-    
-    def add_note(self, note: str, note_type: str = "general") -> None:
-        """Add a note to the session.
-        
-        Args:
-            note: Note text
-            note_type: Type of note (general, observation, etc.)
-        """
-        note_entry = {
-            "text": note,
-            "type": note_type,
-            "timestamp": time.time()
-        }
-        self.notes.append(note_entry)
-    
-    def end_session(self, overall_score: Optional[float] = None) -> None:
-        """End the interview session.
-        
-        Args:
-            overall_score: Overall score for the interview
-        """
-        self.end_time = time.time()
-        self.duration = self.end_time - self.start_time
-        self.status = "completed"
-        self.overall_score = overall_score
-    
-    def cancel_session(self, reason: Optional[str] = None) -> None:
-        """Cancel the interview session.
-        
-        Args:
-            reason: Reason for cancellation
-        """
-        self.end_time = time.time()
-        self.duration = self.end_time - self.start_time
-        self.status = "canceled"
-        if reason:
-            self.add_note(reason, "cancellation_reason")
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert session to dictionary representation.
+            job_title (str, optional): Title of the job
+            resume_path (str, optional): Path to the resume file
+            jd_path (str, optional): Path to the job description file
         
         Returns:
-            Dictionary representation of the session
+            str: Session ID
         """
-        return {
-            "session_id": self.session_id,
-            "candidate_id": self.candidate_id,
+        session_data = {
+            "user_id": self.user_id,
             "job_id": self.job_id,
-            "interviewer_persona_id": self.interviewer_persona_id,
-            "metadata": self.metadata,
+            "job_title": job_title,
+            "start_time": self.start_time,
+            "status": "active",
+            "resume_path": resume_path,
+            "jd_path": jd_path
+        }
+        
+        # Save session to database
+        self.db.collection('interview_sessions').document(self.session_id).set(session_data)
+        
+        return self.session_id
+    
+    def record_question(self, question, question_type="technical", difficulty=1):
+        """
+        Record a question asked during the interview
+        
+        Args:
+            question (str): The question text
+            question_type (str): Type of question (technical, behavioral, etc.)
+            difficulty (int): Difficulty level (1-5)
+            
+        Returns:
+            int: Question index
+        """
+        question_data = {
+            "text": question,
+            "type": question_type,
+            "difficulty": difficulty,
+            "timestamp": datetime.datetime.now()
+        }
+        
+        self.questions.append(question_data)
+        question_idx = len(self.questions) - 1
+        
+        # Update database
+        self.db.collection('interview_sessions').document(self.session_id).collection(
+            'questions').document(str(question_idx)).set(question_data)
+        
+        return question_idx
+    
+    def record_answer(self, question_idx, answer, response_time=None):
+        """
+        Record the candidate's answer to a question
+        
+        Args:
+            question_idx (int): Index of the question being answered
+            answer (str): The candidate's answer
+            response_time (float, optional): Time taken to respond in seconds
+            
+        Returns:
+            int: Answer index
+        """
+        answer_data = {
+            "question_idx": question_idx,
+            "text": answer,
+            "response_time": response_time,
+            "timestamp": datetime.datetime.now()
+        }
+        
+        self.answers.append(answer_data)
+        answer_idx = len(self.answers) - 1
+        
+        # Update database
+        self.db.collection('interview_sessions').document(self.session_id).collection(
+            'answers').document(str(answer_idx)).set(answer_data)
+        
+        return answer_idx
+    
+    def record_feedback(self, question_idx, answer_idx, feedback_text, score=None):
+        """
+        Record feedback for an answer
+        
+        Args:
+            question_idx (int): Index of the question
+            answer_idx (int): Index of the answer
+            feedback_text (str): Feedback on the answer
+            score (float, optional): Score for the answer (0-10)
+            
+        Returns:
+            int: Feedback index
+        """
+        feedback_data = {
+            "question_idx": question_idx,
+            "answer_idx": answer_idx,
+            "text": feedback_text,
+            "score": score,
+            "timestamp": datetime.datetime.now()
+        }
+        
+        self.feedback.append(feedback_data)
+        feedback_idx = len(self.feedback) - 1
+        
+        # Update database
+        self.db.collection('interview_sessions').document(self.session_id).collection(
+            'feedback').document(str(feedback_idx)).set(feedback_data)
+        
+        return feedback_idx
+    
+    def end_session(self, calculate_metrics=True):
+        """
+        End the interview session and calculate final metrics
+        
+        Args:
+            calculate_metrics (bool): Whether to calculate final metrics
+            
+        Returns:
+            dict: Session summary with metrics
+        """
+        self.end_time = datetime.datetime.now()
+        
+        if calculate_metrics:
+            self._calculate_metrics()
+        
+        session_summary = {
+            "session_id": self.session_id,
+            "user_id": self.user_id,
+            "job_id": self.job_id,
             "start_time": self.start_time,
             "end_time": self.end_time,
-            "duration": self.duration,
-            "questions": self.questions,
-            "answers": self.answers,
-            "evaluations": self.evaluations,
-            "notes": self.notes,
-            "overall_score": self.overall_score,
-            "status": self.status
+            "duration": (self.end_time - self.start_time).total_seconds(),
+            "total_questions": len(self.questions),
+            "metrics": self.metrics,
+            "status": "completed"
         }
-    
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
-        """Create a session from a dictionary.
         
-        Args:
-            data: Dictionary containing session data
+        # Update database
+        self.db.collection('interview_sessions').document(self.session_id).update({
+            "end_time": self.end_time,
+            "duration": (self.end_time - self.start_time).total_seconds(),
+            "metrics": self.metrics,
+            "status": "completed"
+        })
+        
+        return session_summary
+    
+    def _calculate_metrics(self):
+        """Calculate interview performance metrics based on answers and feedback"""
+        if not self.answers:
+            return
+        
+        # Calculate total questions and completion rate
+        self.metrics["total_questions"] = len(self.questions)
+        self.metrics["completion_rate"] = len(self.answers) / len(self.questions) if self.questions else 0
+        
+        # Calculate average response time
+        response_times = [a.get("response_time", 0) for a in self.answers if a.get("response_time")]
+        self.metrics["avg_response_time"] = sum(response_times) / len(response_times) if response_times else 0
+        
+        # Calculate scores from feedback
+        if self.feedback:
+            technical_scores = []
+            communication_scores = []
             
-        Returns:
-            New InterviewSession instance
-        """
-        session = cls(
-            session_id=data.get("session_id"),
-            candidate_id=data.get("candidate_id"),
-            job_id=data.get("job_id"),
-            interviewer_persona_id=data.get("interviewer_persona_id"),
-            metadata=data.get("metadata", {})
-        )
-        
-        session.start_time = data.get("start_time", time.time())
-        session.end_time = data.get("end_time")
-        session.duration = data.get("duration")
-        session.questions = data.get("questions", [])
-        session.answers = data.get("answers", [])
-        session.evaluations = data.get("evaluations", [])
-        session.notes = data.get("notes", [])
-        session.overall_score = data.get("overall_score")
-        session.status = data.get("status", "in_progress")
-        
-        return session
-
-
-class SessionRecorder:
-    """Record and manage interview sessions."""
-    
-    def __init__(self, storage_dir: Optional[str] = None):
-        """Initialize the session recorder.
-        
-        Args:
-            storage_dir: Directory for storing session data
-        """
-        self.storage_dir = storage_dir or os.path.join(os.getcwd(), "interview_sessions")
-        self.active_sessions = {}
-        
-        # Create storage directory if it doesn't exist
-        if not os.path.exists(self.storage_dir):
-            os.makedirs(self.storage_dir)
-    
-    def create_session(self, 
-                     candidate_id: Optional[str] = None,
-                     job_id: Optional[str] = None,
-                     interviewer_persona_id: Optional[str] = None,
-                     metadata: Optional[Dict[str, Any]] = None) -> InterviewSession:
-        """Create a new interview session.
-        
-        Args:
-            candidate_id: ID of the candidate
-            job_id: ID of the job position
-            interviewer_persona_id: ID of the interviewer persona
-            metadata: Additional session metadata
+            for f in self.feedback:
+                score = f.get("score")
+                if score is not None:
+                    q_idx = f.get("question_idx")
+                    if q_idx is not None and q_idx < len(self.questions):
+                        q_type = self.questions[q_idx].get("type")
+                        if q_type == "technical":
+                            technical_scores.append(score)
+                        else:
+                            communication_scores.append(score)
             
-        Returns:
-            New InterviewSession instance
-        """
-        session = InterviewSession(
-            candidate_id=candidate_id,
-            job_id=job_id,
-            interviewer_persona_id=interviewer_persona_id,
-            metadata=metadata
-        )
-        
-        # Add to active sessions
-        self.active_sessions[session.session_id] = session
-        
-        return session
-    
-    def get_session(self, session_id: str) -> Optional[InterviewSession]:
-        """Get a session by ID.
-        
-        Args:
-            session_id: ID of the session to retrieve
+            if technical_scores:
+                self.metrics["technical_score"] = sum(technical_scores) / len(technical_scores)
             
-        Returns:
-            InterviewSession if found, None otherwise
-        """
-        # Check active sessions first
-        if session_id in self.active_sessions:
-            return self.active_sessions[session_id]
-        
-        # Try to load from storage
-        try:
-            session_path = os.path.join(self.storage_dir, f"{session_id}.json")
-            if os.path.exists(session_path):
-                with open(session_path, 'r') as f:
-                    session_data = json.load(f)
-                return InterviewSession.from_dict(session_data)
-        except Exception as e:
-            logger.error(f"Error loading session {session_id}: {str(e)}")
-        
-        return None
-    
-    def save_session(self, session: InterviewSession) -> bool:
-        """Save a session to storage.
-        
-        Args:
-            session: Session to save
+            if communication_scores:
+                self.metrics["communication_score"] = sum(communication_scores) / len(communication_scores)
             
-        Returns:
-            True if saved successfully, False otherwise
-        """
-        try:
-            session_path = os.path.join(self.storage_dir, f"{session.session_id}.json")
-            with open(session_path, 'w') as f:
-                json.dump(session.to_dict(), f, indent=2)
-            return True
-        except Exception as e:
-            logger.error(f"Error saving session {session.session_id}: {str(e)}")
-            return False
+            # Calculate overall score
+            if technical_scores or communication_scores:
+                tech_weight = 0.7  # Technical questions weighted more
+                comm_weight = 0.3
+                
+                if not technical_scores:
+                    self.metrics["overall_score"] = self.metrics["communication_score"]
+                elif not communication_scores:
+                    self.metrics["overall_score"] = self.metrics["technical_score"]
+                else:
+                    self.metrics["overall_score"] = (
+                        tech_weight * self.metrics["technical_score"] + 
+                        comm_weight * self.metrics["communication_score"]
+                    )
     
-    def end_and_save_session(self, session_id: str, overall_score: Optional[float] = None) -> bool:
-        """End a session and save it to storage.
-        
-        Args:
-            session_id: ID of the session to end
-            overall_score: Overall score for the interview
-            
-        Returns:
-            True if ended and saved successfully, False otherwise
+    def get_session_transcript(self):
         """
-        if session_id not in self.active_sessions:
-            logger.error(f"Session {session_id} not found in active sessions")
-            return False
+        Generate a transcript of the interview session
         
-        session = self.active_sessions[session_id]
-        session.end_session(overall_score)
-        
-        # Save to storage
-        success = self.save_session(session)
-        
-        # Remove from active sessions if saved successfully
-        if success:
-            del self.active_sessions[session_id]
-        
-        return success
-    
-    def get_session_transcript(self, session_id: str) -> List[Dict[str, Any]]:
-        """Get a chronological transcript of the session.
-        
-        Args:
-            session_id: ID of the session
-            
         Returns:
-            List of question-answer pairs in chronological order
+            list: Transcript of questions, answers and feedback
         """
-        session = self.get_session(session_id)
-        if not session:
-            return []
-        
-        # Create a merged list of questions and answers
         transcript = []
         
-        # Add questions to transcript
-        for q in session.questions:
-            transcript.append({
+        for i, question in enumerate(self.questions):
+            q_entry = {
                 "type": "question",
-                "timestamp": q["timestamp"],
-                "question_id": q["question_id"],
-                "text": q["text"],
-                "category": q.get("category", "general")
-            })
-        
-        # Add answers to transcript
-        for a in session.answers:
-            transcript.append({
-                "type": "answer",
-                "timestamp": a["timestamp"],
-                "question_id": a["question_id"],
-                "text": a["text"]
-            })
-        
-        # Sort by timestamp
-        transcript.sort(key=lambda x: x["timestamp"])
+                "text": question["text"],
+                "timestamp": question["timestamp"]
+            }
+            transcript.append(q_entry)
+            
+            # Find corresponding answer
+            answer = next((a for a in self.answers if a["question_idx"] == i), None)
+            if answer:
+                a_entry = {
+                    "type": "answer",
+                    "text": answer["text"],
+                    "timestamp": answer["timestamp"]
+                }
+                transcript.append(a_entry)
+                
+                # Find corresponding feedback
+                feedback = next((f for f in self.feedback if f["answer_idx"] == i), None)
+                if feedback:
+                    f_entry = {
+                        "type": "feedback",
+                        "text": feedback["text"],
+                        "timestamp": feedback["timestamp"]
+                    }
+                    transcript.append(f_entry)
         
         return transcript
     
-    def get_session_summary(self, session_id: str) -> Dict[str, Any]:
-        """Generate a summary of the interview session.
+    def export_session(self, format="json", output_path=None):
+        """
+        Export the interview session data
         
         Args:
-            session_id: ID of the session
+            format (str): Export format (json, pdf, txt)
+            output_path (str, optional): Path to save the export
             
         Returns:
-            Summary data for the session
+            str: Path to the exported file or the data string
         """
-        session = self.get_session(session_id)
-        if not session:
-            return {"error": "Session not found"}
+        session_data = {
+            "session_id": self.session_id,
+            "user_id": self.user_id,
+            "job_id": self.job_id,
+            "start_time": str(self.start_time),
+            "end_time": str(self.end_time) if self.end_time else None,
+            "questions": self.questions,
+            "answers": self.answers,
+            "feedback": self.feedback,
+            "metrics": self.metrics,
+            "transcript": self.get_session_transcript()
+        }
+        
+        if format == "json":
+            # Convert datetime objects to strings
+            export_data = json.dumps(session_data, default=str, indent=2)
+            
+            if output_path:
+                with open(output_path, 'w') as f:
+                    f.write(export_data)
+                return output_path
+            else:
+                return export_data
+        
+        elif format == "txt":
+            # Generate plain text format
+            transcript = self.get_session_transcript()
+            text_output = f"Interview Session: {self.session_id}\n"
+            text_output += f"Date: {self.start_time.strftime('%Y-%m-%d')}\n"
+            text_output += f"Duration: {(self.end_time - self.start_time).total_seconds() / 60:.2f} minutes\n\n"
+            
+            for item in transcript:
+                item_type = item["type"].capitalize()
+                timestamp = item["timestamp"].strftime('%H:%M:%S')
+                text_output += f"[{timestamp}] {item_type}: {item['text']}\n\n"
+            
+            text_output += f"\nMetrics:\n"
+            for metric, value in self.metrics.items():
+                text_output += f"{metric.replace('_', ' ').title()}: {value}\n"
+            
+            if output_path:
+                with open(output_path, 'w') as f:
+                    f.write(text_output)
+                return output_path
+            else:
+                return text_output
+                
+        else:
+            raise ValueError(f"Unsupported export format: {format}")

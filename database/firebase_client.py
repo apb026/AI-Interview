@@ -1,233 +1,187 @@
+import os
+import json
 import firebase_admin
-from firebase_admin import credentials, firestore, storage, auth
-from app.config import (
-    FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID,
-    FIREBASE_STORAGE_BUCKET, FIREBASE_MESSAGING_SENDER_ID,
-    FIREBASE_APP_ID, FIREBASE_DATABASE_URL
-)
-import pyrebase
-import datetime
+from firebase_admin import credentials, firestore
+from datetime import datetime
+
+def initialize_firebase():
+    """Initialize Firebase Admin SDK"""
+    # Check if already initialized
+    if len(firebase_admin._apps) > 0:
+        return firestore.client()
+    
+    # Get credentials
+    cred_path = os.environ.get('FIREBASE_CREDENTIALS_PATH')
+    
+    if cred_path and os.path.exists(cred_path):
+        # Use service account file
+        cred = credentials.Certificate(cred_path)
+    else:
+        # Check for JSON credentials in environment variable
+        cred_json = os.environ.get('FIREBASE_CREDENTIALS')
+        if cred_json:
+            try:
+                cred_dict = json.loads(cred_json)
+                cred = credentials.Certificate(cred_dict)
+            except (json.JSONDecodeError, ValueError):
+                raise ValueError("Invalid Firebase credentials JSON")
+        else:
+            # Use application default credentials
+            cred = credentials.ApplicationDefault()
+    
+    # Initialize app
+    firebase_admin.initialize_app(cred)
+    return firestore.client()
 
 class FirebaseClient:
-    _instance = None
+    """Firebase client for database operations"""
     
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(FirebaseClient, cls).__new__(cls)
-            cls._instance._initialize_firebase()
-        return cls._instance
+    def __init__(self):
+        """Initialize the Firebase client"""
+        self.db = firestore.client()
     
-    def _initialize_firebase(self):
-        """Initialize Firebase Admin SDK and Pyrebase"""
-        try:
-            # Initialize Firebase Admin SDK with application default credentials
-            # This assumes you've set up credentials, or are running in a Google Cloud environment
-            try:
-                firebase_admin.get_app()
-            except ValueError:
-                # If not already initialized
-                cred = credentials.Certificate("firebase-service-account.json")
-                firebase_admin.initialize_app(cred, {
-                    'storageBucket': FIREBASE_STORAGE_BUCKET
-                })
-            
-            # Initialize Pyrebase for authentication
-            self.pb_config = {
-                "apiKey": FIREBASE_API_KEY,
-                "authDomain": FIREBASE_AUTH_DOMAIN,
-                "databaseURL": FIREBASE_DATABASE_URL,
-                "projectId": FIREBASE_PROJECT_ID,
-                "storageBucket": FIREBASE_STORAGE_BUCKET,
-                "messagingSenderId": FIREBASE_MESSAGING_SENDER_ID,
-                "appId": FIREBASE_APP_ID
-            }
-            self.pb = pyrebase.initialize_app(self.pb_config)
-            
-            # Get services
-            self.db = firestore.client()
-            self.storage_bucket = storage.bucket()
-            self.pb_auth = self.pb.auth()
-            
-            print("Firebase initialized successfully")
-        except Exception as e:
-            print(f"Error initializing Firebase: {e}")
-            raise
+    def document_to_dict(self, doc):
+        """Convert Firestore document to dictionary"""
+        if not doc.exists:
+            return None
+        
+        doc_dict = doc.to_dict()
+        doc_dict['id'] = doc.id
+        
+        # Convert Firestore timestamps to Python datetime
+        for key, value in doc_dict.items():
+            if isinstance(value, firestore.firestore.SERVER_TIMESTAMP):
+                doc_dict[key] = datetime.now()
+        
+        return doc_dict
     
-    # User Management Methods
-    def create_user(self, email, password, display_name=None):
-        """Create a new user in Firebase Authentication"""
-        try:
-            user = auth.create_user(
-                email=email,
-                password=password,
-                display_name=display_name
-            )
-            
-            # Create user document in Firestore
-            user_data = {
-                'email': email,
-                'display_name': display_name,
-                'created_at': datetime.datetime.now(),
-                'updated_at': datetime.datetime.now()
-            }
-            self.db.collection('users').document(user.uid).set(user_data)
-            
-            return user.uid
-        except Exception as e:
-            print(f"Error creating user: {e}")
-            raise
+    def collection_to_list(self, collection):
+        """Convert Firestore collection to list of dictionaries"""
+        result = []
+        for doc in collection:
+            doc_dict = self.document_to_dict(doc)
+            if doc_dict:
+                result.append(doc_dict)
+        return result
     
+    # User operations
     def get_user(self, user_id):
-        """Retrieve user data from Firestore"""
-        try:
-            user_doc = self.db.collection('users').document(user_id).get()
-            if user_doc.exists:
-                return user_doc.to_dict()
-            else:
-                return None
-        except Exception as e:
-            print(f"Error retrieving user: {e}")
-            raise
+        """Get user by ID"""
+        doc_ref = self.db.collection('users').document(user_id)
+        doc = doc_ref.get()
+        return self.document_to_dict(doc)
     
-    def update_user(self, user_id, data):
-        """Update user document in Firestore"""
-        try:
-            data['updated_at'] = datetime.datetime.now()
-            self.db.collection('users').document(user_id).update(data)
-            return True
-        except Exception as e:
-            print(f"Error updating user: {e}")
-            raise
+    def create_user(self, user_data):
+        """Create a new user"""
+        # Check if user with email already exists
+        email = user_data.get('email')
+        if email:
+            query = self.db.collection('users').where('email', '==', email).limit(1)
+            if len(list(query.stream())) > 0:
+                raise ValueError(f"User with email {email} already exists")
+        
+        # Add timestamp
+        user_data['created_at'] = firestore.SERVER_TIMESTAMP
+        
+        # Add to database
+        doc_ref = self.db.collection('users').document()
+        doc_ref.set(user_data)
+        
+        # Return with ID
+        return {**user_data, 'id': doc_ref.id}
     
-    # Document Storage Methods
-    def upload_document(self, user_id, file_path, document_type):
-        """Upload a document to Firebase Storage"""
-        try:
-            file_name = file_path.split('/')[-1]
-            storage_path = f"{user_id}/{document_type}/{file_name}"
-            blob = self.storage_bucket.blob(storage_path)
-            blob.upload_from_filename(file_path)
-            
-            # Make the file publicly accessible
-            blob.make_public()
-            
-            # Store document metadata in Firestore
-            doc_data = {
-                'user_id': user_id,
-                'file_name': file_name,
-                'document_type': document_type,
-                'storage_path': storage_path,
-                'public_url': blob.public_url,
-                'uploaded_at': datetime.datetime.now()
-            }
-            
-            # Add to user's documents collection
-            self.db.collection('users').document(user_id).collection('documents').add(doc_data)
-            
-            return {
-                'storage_path': storage_path,
-                'public_url': blob.public_url
-            }
-        except Exception as e:
-            print(f"Error uploading document: {e}")
-            raise
+    def update_user(self, user_id, update_data):
+        """Update user data"""
+        doc_ref = self.db.collection('users').document(user_id)
+        doc_ref.update(update_data)
+        return True
     
-    def get_user_documents(self, user_id, document_type=None):
-        """Retrieve user's documents from Firestore"""
-        try:
-            docs_ref = self.db.collection('users').document(user_id).collection('documents')
-            
-            if document_type:
-                query = docs_ref.where('document_type', '==', document_type)
-            else:
-                query = docs_ref
-                
-            results = []
-            for doc in query.stream():
-                doc_data = doc.to_dict()
-                doc_data['id'] = doc.id
-                results.append(doc_data)
-                
-            return results
-        except Exception as e:
-            print(f"Error retrieving documents: {e}")
-            raise
-    
-    # Interview Session Methods
-    def create_interview_session(self, user_id, resume_id, job_description_id, data=None):
+    # Interview session operations
+    def create_interview_session(self, session_data):
         """Create a new interview session"""
-        try:
-            session_data = {
-                'user_id': user_id,
-                'resume_id': resume_id,
-                'job_description_id': job_description_id,
-                'status': 'created',
-                'created_at': datetime.datetime.now(),
-                'updated_at': datetime.datetime.now()
-            }
-            
-            if data:
-                session_data.update(data)
-                
-            session_ref = self.db.collection('interview_sessions').add(session_data)
-            return session_ref[1].id
-        except Exception as e:
-            print(f"Error creating interview session: {e}")
-            raise
+        # Add timestamp
+        session_data['created_at'] = firestore.SERVER_TIMESTAMP
+        session_data['updated_at'] = firestore.SERVER_TIMESTAMP
+        
+        # Add to database
+        doc_ref = self.db.collection('interview_sessions').document()
+        doc_ref.set(session_data)
+        
+        # Return with ID
+        return {**session_data, 'id': doc_ref.id}
     
     def get_interview_session(self, session_id):
-        """Retrieve interview session data"""
-        try:
-            session_doc = self.db.collection('interview_sessions').document(session_id).get()
-            if session_doc.exists:
-                return session_doc.to_dict()
-            else:
-                return None
-        except Exception as e:
-            print(f"Error retrieving interview session: {e}")
-            raise
+        """Get interview session by ID"""
+        doc_ref = self.db.collection('interview_sessions').document(session_id)
+        doc = doc_ref.get()
+        return self.document_to_dict(doc)
     
-    def update_interview_session(self, session_id, data):
+    def update_interview_session(self, session_id, update_data):
         """Update interview session data"""
-        try:
-            data['updated_at'] = datetime.datetime.now()
-            self.db.collection('interview_sessions').document(session_id).update(data)
-            return True
-        except Exception as e:
-            print(f"Error updating interview session: {e}")
-            raise
+        update_data['updated_at'] = firestore.SERVER_TIMESTAMP
+        doc_ref = self.db.collection('interview_sessions').document(session_id)
+        doc_ref.update(update_data)
+        return True
     
-    def save_interview_question(self, session_id, question_data):
-        """Save an interview question to the session"""
-        try:
-            question_data['created_at'] = datetime.datetime.now()
-            self.db.collection('interview_sessions').document(session_id).collection('questions').add(question_data)
-            return True
-        except Exception as e:
-            print(f"Error saving interview question: {e}")
-            raise
+    def get_user_sessions(self, user_id, limit=10):
+        """Get interview sessions for a user"""
+        query = self.db.collection('interview_sessions')\
+            .where('user_id', '==', user_id)\
+            .order_by('created_at', direction='DESCENDING')\
+            .limit(limit)
+        
+        return self.collection_to_list(query.stream())
     
-    def save_interview_response(self, session_id, question_id, response_data):
-        """Save a response to an interview question"""
-        try:
-            response_data['created_at'] = datetime.datetime.now()
-            self.db.collection('interview_sessions').document(session_id).collection('questions').document(question_id).update({
-                'response': response_data
-            })
-            return True
-        except Exception as e:
-            print(f"Error saving interview response: {e}")
-            raise
+    # Document operations
+    def save_document(self, collection, data):
+        """Save a document to a collection"""
+        # Add timestamps
+        data['created_at'] = firestore.SERVER_TIMESTAMP
+        data['updated_at'] = firestore.SERVER_TIMESTAMP
+        
+        # Add to database
+        doc_ref = self.db.collection(collection).document()
+        doc_ref.set(data)
+        
+        # Return with ID
+        return {**data, 'id': doc_ref.id}
     
-    def get_interview_questions(self, session_id):
-        """Get all questions for an interview session"""
-        try:
-            questions = []
-            for doc in self.db.collection('interview_sessions').document(session_id).collection('questions').stream():
-                question_data = doc.to_dict()
-                question_data['id'] = doc.id
-                questions.append(question_data)
-            return questions
-        except Exception as e:
-            print(f"Error retrieving interview questions: {e}")
-            raise
+    def get_document(self, collection, doc_id):
+        """Get a document by ID"""
+        doc_ref = self.db.collection(collection).document(doc_id)
+        doc = doc_ref.get()
+        return self.document_to_dict(doc)
+    
+    def update_document(self, collection, doc_id, update_data):
+        """Update a document"""
+        update_data['updated_at'] = firestore.SERVER_TIMESTAMP
+        doc_ref = self.db.collection(collection).document(doc_id)
+        doc_ref.update(update_data)
+        return True
+    
+    def delete_document(self, collection, doc_id):
+        """Delete a document"""
+        doc_ref = self.db.collection(collection).document(doc_id)
+        doc_ref.delete()
+        return True
+    
+    def query_collection(self, collection, filters=None, order_by=None, limit=None):
+        """Query a collection with filters"""
+        query = self.db.collection(collection)
+        
+        # Apply filters
+        if filters:
+            for field, op, value in filters:
+                query = query.where(field, op, value)
+        
+        # Apply ordering
+        if order_by:
+            field, direction = order_by if isinstance(order_by, tuple) else (order_by, 'ASCENDING')
+            direction = firestore.Query.DESCENDING if direction.upper() == 'DESCENDING' else firestore.Query.ASCENDING
+            query = query.order_by(field, direction=direction)
+        
+        # Apply limit
+        if limit:
+            query = query.limit(limit)
+        
+        return self.collection_to_list(query.stream())
