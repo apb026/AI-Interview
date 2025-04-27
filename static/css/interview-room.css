@@ -1,0 +1,464 @@
+/* interview-room.css - Styling for the AI interview interface */
+
+/* Main interview room layout */
+.interview-container {
+    display: flex;
+    height: calc(100vh - 70px);
+    background-color: #f8fafc;
+}
+
+/* Left sidebar for controls and info */
+.interview-sidebar {
+    width: 300px;
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.interview-info {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.interview-info h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: #334155;
+}
+
+.interview-info p {
+    color: #64748b;
+    margin-bottom: 5px;
+}
+
+.interview-controls {
+    padding: 20px;
+}
+
+.control-group {
+    margin-bottom: 15px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.control-group select,
+.control-group button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+}
+
+.timer {
+    padding: 15px;
+    background-color: #f1f5f9;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.timer-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #334155;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-record,
+.btn-end {
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-record {
+    background-color: #ef4444;
+    color: white;
+}
+
+.btn-record:hover {
+    background-color: #dc2626;
+}
+
+.btn-end {
+    background-color: #475569;
+    color: white;
+}
+
+.btn-end:hover {
+    background-color: #334155;
+}
+
+.btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Main interview content area */
+.interview-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Video and visual feedback area */
+.video-container {
+    display: flex;
+    height: 55%;
+    background-color: #0f172a;
+    padding: 20px;
+    gap: 20px;
+}
+
+.participant-video {
+    flex: 1;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #1e293b;
+}
+
+.participant-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.participant-video.user-video {
+    max-width: 30%;
+}
+
+.participant-name {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.video-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.video-control-btn {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.video-control-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.video-control-btn.active {
+    background-color: #ef4444;
+}
+
+/* Chat and dialog area */
+.chat-container {
+    height: 45%;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.message-avatar.ai {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.message-content {
+    background-color: #f1f5f9;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border-top-left-radius: 0;
+    max-width: 75%;
+}
+
+.message.ai .message-content {
+    background-color: #dbeafe;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 0;
+}
+
+.message-text {
+    color: #334155;
+    line-height: 1.5;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.chat-input {
+    display: flex;
+    padding: 15px;
+    border-top: 1px solid #e2e8f0;
+    background-color: #ffffff;
+}
+
+.chat-input input {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin-right: 10px;
+}
+
+.chat-input button {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.chat-input button:hover {
+    background-color: #2563eb;
+}
+
+/* Feedback panel */
+.feedback-panel {
+    position: fixed;
+    top: 70px;
+    right: 0;
+    width: 0;
+    height: calc(100vh - 70px);
+    background-color: white;
+    border-left: 1px solid #e2e8f0;
+    z-index: 50;
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+
+.feedback-panel.active {
+    width: 350px;
+}
+
+.feedback-content {
+    padding: 20px;
+    width: 350px;
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.feedback-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #334155;
+}
+
+.close-feedback {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.feedback-section {
+    margin-bottom: 20px;
+}
+
+.feedback-section h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #334155;
+    font-size: 1rem;
+}
+
+.feedback-item {
+    background-color: #f8fafc;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.feedback-rating {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.rating-label {
+    font-weight: 500;
+    margin-right: 10px;
+    color: #334155;
+}
+
+.rating-stars {
+    display: flex;
+    color: #f59e0b;
+}
+
+.feedback-text {
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.feedback-tip {
+    background-color: #dbeafe;
+    border-left: 4px solid #3b82f6;
+    padding: 10px 15px;
+    margin-top: 10px;
+    color: #334155;
+}
+
+/* Loading state */
+.loading-indicator {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.loading-indicator.active {
+    display: flex;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 4px solid rgba(59, 130, 246, 0.1);
+    border-top-color: #3b82f6;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .interview-container {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .interview-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .video-container {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .participant-video.user-video {
+        max-width: 100%;
+        height: 200px;
+    }
+    
+    .feedback-panel.active {
+        width: 100%;
+    }
+    
+    .feedback-content {
+        width: 100%;
+    }
+}
+
+/* AI Interviewer persona-specific styles */
+.interviewer-technical {
+    border-left: 4px solid #3b82f6;
+}
+
+.interviewer-behavioral {
+    border-left: 4px solid #10b981;
+}
+
+.interviewer-leadership {
+    border-left: 4px solid #8b5cf6;
+}
+
+.interviewer-stress {
+    border-left: 4px solid #ef4444;
+}
+
+/* Animation for incoming messages */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message {
+    animation: fadeIn 0.3s ease-out;
+}
